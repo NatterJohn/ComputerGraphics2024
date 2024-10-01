@@ -38,7 +38,121 @@ public class GraphicsPipeline : MonoBehaviour
 
         writeVertsToFile(imageAfterRotation);
 
-   
+        writer.WriteLine("" +
+            "" +
+            "" +
+            "" +
+            "");
+        Matrix4x4 scaleMatrix =
+         Matrix4x4.TRS(Vector3.zero,
+                     Quaternion.identity,
+                     new Vector3(7, 3, 5));
+
+        writeMatrixToFile(scaleMatrix);
+
+        List<Vector4> imageAfterScale =
+    applyTransformation(imageAfterRotation, scaleMatrix);
+
+
+
+
+        writer.WriteLine("Verts");
+
+        writeVertsToFile(imageAfterScale);
+
+        writer.WriteLine("" +
+            "" +
+            "" +
+            "" +
+            "");
+        Matrix4x4 translationMatrix =
+         Matrix4x4.TRS(new Vector3(4, 2, -4),
+                     Quaternion.identity,
+                     Vector3.one);
+
+        writeMatrixToFile(translationMatrix);
+
+        List<Vector4> imageAfterTranslation =
+    applyTransformation(imageAfterScale, translationMatrix);
+
+
+
+
+        writer.WriteLine("Verts");
+
+        writeVertsToFile(imageAfterTranslation);
+
+        writer.WriteLine("" +
+            "" +
+            "" +
+            "" +
+            "");
+
+        Matrix4x4 transformationMatrix = translationMatrix * scaleMatrix * rotationMatrix;
+        writeMatrixToFile(transformationMatrix);
+
+        List<Vector4> imageAfterTransformation =
+    applyTransformation(verts, transformationMatrix);
+
+        writer.WriteLine("Verts");
+
+        writeVertsToFile(imageAfterTransformation);
+
+        writer.WriteLine("" +
+            "" +
+            "" +
+            "" +
+            "");
+        Matrix4x4 viewingMatrix = Matrix4x4.LookAt(new Vector3(20, -2, 45),
+                     new Vector3(-5, 7, 5),
+                     new Vector3(-4, -5, 18));
+
+        writeMatrixToFile(viewingMatrix);
+
+        List<Vector4> imageAfterViewing =
+    applyTransformation(imageAfterTransformation, viewingMatrix);
+
+        writer.WriteLine("Verts");
+
+        writeVertsToFile(imageAfterViewing);
+
+
+
+        writer.WriteLine("" +
+             "" +
+             "" +
+             "" +
+             "");
+        Matrix4x4 projectionMatrix = Matrix4x4.Perspective(90, 1, 1, 1000);
+
+        writeMatrixToFile(projectionMatrix);
+
+        List<Vector4> imageAfterProjection =
+    applyTransformation(imageAfterViewing, projectionMatrix);
+
+        writer.WriteLine("Verts");
+
+        writeVertsToFile(imageAfterProjection);
+        /*writer.WriteLine("" +
+            "" +
+            "" +
+            "" +
+            "");
+        Matrix4x4 singleMatrix = Matrix4x4.LookAt(new Vector3(20, -2, 45),
+                     new Vector3(-5, 7, 5),
+                     new Vector3(-4, -5, 18));
+
+        writeMatrixToFile(singleMatrix);
+
+        List<Vector4> imageAfterSingle =
+    applyTransformation(imageAfterTransformation, viewingMatrix);
+
+
+
+
+        writer.WriteLine("Verts");
+
+        writeVertsToFile(imageAfterViewing);*/
         writer.Close();
     }
 
