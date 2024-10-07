@@ -14,7 +14,7 @@ public class GraphicsPipeline : MonoBehaviour
 
         writer = new StreamWriter("Verts and Matrices.txt");
         myLetter = new Model();
-        // myLetter.CreateUnityGameObject();
+        myLetter.CreateUnityGameObject();
         List<Vector4> verts = convertToHomg(myLetter.vertices);
 
 
@@ -133,26 +133,43 @@ public class GraphicsPipeline : MonoBehaviour
         writer.WriteLine("Verts");
 
         writeVertsToFile(imageAfterProjection);
-        /*writer.WriteLine("" +
+
+
+
+        writer.WriteLine("" +
             "" +
             "" +
             "" +
             "");
-        Matrix4x4 singleMatrix = Matrix4x4.LookAt(new Vector3(20, -2, 45),
-                     new Vector3(-5, 7, 5),
-                     new Vector3(-4, -5, 18));
+        Matrix4x4 singleMatrix = projectionMatrix * viewingMatrix * transformationMatrix;
 
         writeMatrixToFile(singleMatrix);
 
         List<Vector4> imageAfterSingle =
-    applyTransformation(imageAfterTransformation, viewingMatrix);
-
-
-
+    applyTransformation(verts, singleMatrix);
 
         writer.WriteLine("Verts");
 
-        writeVertsToFile(imageAfterViewing);*/
+        writeVertsToFile(imageAfterSingle);
+
+
+
+        
+        writer.WriteLine("" +
+            "" +
+            "" +
+            "" +
+            "");
+        Matrix4x4 handProjection = projectionMatrix * viewingMatrix * transformationMatrix;
+
+        writeMatrixToFile(handProjection);
+
+        List<Vector4> imageAfterHand =
+    applyTransformation(imageAfterViewing, handProjection);
+
+        writer.WriteLine("Verts");
+
+        writeVertsToFile(imageAfterHand);
         writer.Close();
     }
 
