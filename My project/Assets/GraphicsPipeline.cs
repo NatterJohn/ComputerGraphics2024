@@ -11,7 +11,7 @@ public class GraphicsPipeline : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        /*
         writer = new StreamWriter("Verts and Matrices.txt");
         myLetter = new Model();
         myLetter.CreateUnityGameObject();
@@ -171,6 +171,12 @@ public class GraphicsPipeline : MonoBehaviour
 
         writeVertsToFile(imageAfterHand);
         writer.Close();
+        */
+        Outcode oone = new Outcode(new Vector2(-2, -2));
+        Outcode otwo = new Outcode(new Vector2(2, 0));
+        oone.displayOutcode();
+        otwo.displayOutcode();
+        (oone + otwo).displayOutcode();
     }
 
     private void writeVertsToFile(List<Vector4> listOfVerts)
@@ -179,8 +185,9 @@ public class GraphicsPipeline : MonoBehaviour
         {
             writer.WriteLine(vert);
         }
+        
     }
-
+        
     // Update is called once per frame
     void Update()
     {
