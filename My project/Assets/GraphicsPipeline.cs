@@ -177,6 +177,69 @@ public class GraphicsPipeline : MonoBehaviour
         oone.displayOutcode();
         otwo.displayOutcode();
         (oone + otwo).displayOutcode();
+
+
+        print(Intersect(new Vector2(-1.5f, 0.5f), new Vector2(0.5f, -1.5f), 0));
+    }
+    /// <summary>
+    /// Use Cohen Sutherland Algorithm to clip the Line segment from start to end, NOTE start and end may change
+    /// </summary>
+    /// <param name="start"></param>
+    /// <param name="end"></param>
+    /// <returns></returns>
+    public bool LineClip(ref Vector2 start,ref Vector2 end)
+    {
+        Outcode startOutCode  = new Outcode(start);
+        Outcode endOutCode = new Outcode(end);
+        Outcode inScreenOutCode = new Outcode(Vector2.zero);   // 0000
+
+        if ((startOutCode + endOutCode) == inScreenOutCode) return true;
+        if ((startOutCode * endOutCode) != inScreenOutCode) return false;
+
+        if (startOutCode == inScreenOutCode) return LineClip(ref end, ref start);
+
+        // Start must be outside screen
+
+        if (startOutCode.up)
+        {
+            start = Intersect(start, end, 0);
+            return LineClip(ref start, ref end);
+        }
+
+        if (startOutCode.down)
+        {
+            start = Intersect(start, end, 1);
+            return LineClip(ref start, ref end);
+        }
+
+        if (startOutCode.left)
+        {
+            start = Intersect(start, end, 2);
+            return LineClip(ref start, ref end);
+        }
+
+        if (startOutCode.right)
+        {
+            start = Intersect(start, end, 3);
+            return LineClip(ref start, ref end);
+        }
+
+    }
+    Vector2 Intersect(Vector2 start, Vector2 end, int edge)
+    {
+        float m = (end.y - start.y) / (end.x - start.x);
+        float c = start.y - m * (start.x);
+        switch (edge)
+        {
+            case 0:
+                return new Vector2((1 - c) / m, 1);
+            case 1:
+                return new Vector2((-1 - c) / m, -1);
+            case 2:
+                return new Vector2(-1, m * (-1) + c);
+            default:
+                return new Vector2(1, m * (1) + c);
+        }
     }
 
     private void writeVertsToFile(List<Vector4> listOfVerts)
