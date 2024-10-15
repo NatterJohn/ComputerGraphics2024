@@ -16,7 +16,7 @@ public class Outcode
         down = point.y < -1;
         left = point.x < -1;
         right = point.x > 1;
-        
+
     }
     public Outcode(Boolean upIn, Boolean downIn, Boolean leftIn, Boolean rightIn)
     {
@@ -40,4 +40,6 @@ public class Outcode
     { return (a.up == b.up) && (a.down == b.down) && (a.left == b.left) && (a.right == b.right); }
     public static Boolean operator !=(Outcode a, Outcode b)
     { return !(a == b); }
+
+
 }
