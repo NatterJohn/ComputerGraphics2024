@@ -223,8 +223,9 @@ public class GraphicsPipeline : MonoBehaviour
             start = Intersect(start, end, 3);
             return LineClip(ref start, ref end);
         }
-
+        return false;
     }
+
     Vector2 Intersect(Vector2 start, Vector2 end, int edge)
     {
         float m = (end.y - start.y) / (end.x - start.x);
@@ -286,7 +287,37 @@ public class GraphicsPipeline : MonoBehaviour
             writer.WriteLine(matrix.GetRow(i).x + " , " + matrix.GetRow(i).y + " , " + matrix.GetRow(i).z + " , " + matrix.GetRow(i).w);
     }
 
-    
 
+    List<Vector2Int> bresh(Vector2Int start, Vector2Int end) {
+        List<Vector2Int> outList = new List<Vector2Int>();
+        outList.Add(start);
+        float xo = start.x;
+        float yo = start.y;
+        float xt = end.x;
+        float yt = end.y;
+        float dx = xt - xo;
+        float dy = yt - yo;
+        float neg = 2*(dy - dx);
+        float pos = 2 * dy;
+        float p = 2 * dy - dx;
+        xo++;
+        while (xo != xt)
+        {
+            if (p < 0)
+            {
+                p += pos;
+            }
+            else
+            {
+                yo++;
+                p += neg;
+            }
+            Vector2Int newPoint = new Vector2Int();
+            newPoint.x = (int)xo;
+            newPoint.y = (int)yo;
+            outList.Add(newPoint);
+        }
+        return outList;
+    }
 
 }
