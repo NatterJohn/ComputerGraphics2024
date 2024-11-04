@@ -1,6 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using UnityEngine;
 
@@ -11,7 +11,21 @@ public class GraphicsPipeline : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        /*
+
+
+        GameObject ScreenGO = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        Renderer ScreenRender = ScreenGO.GetComponent<Renderer>();
+        ScreenGO.transform.up = Vector3.back;
+        Texture2D screenTexture = new Texture2D(1024, 1024);
+        ScreenRender.material.mainTexture = screenTexture;
+
+        List<Vector2Int> points = bresh(new Vector2Int(0, 0), new Vector2Int(1024, 1024));
+        foreach (Vector2Int point in points)
+            screenTexture.SetPixel(point.x, point.y, Color.red);
+        screenTexture.Apply();
+        
+
+        
         writer = new StreamWriter("Verts and Matrices.txt");
         myLetter = new Model();
         myLetter.CreateUnityGameObject();
@@ -171,7 +185,6 @@ public class GraphicsPipeline : MonoBehaviour
 
         writeVertsToFile(imageAfterHand);
         writer.Close();
-        */
         Outcode oone = new Outcode(new Vector2(-2, -2));
         Outcode otwo = new Outcode(new Vector2(2, 0));
         oone.displayOutcode();
@@ -180,7 +193,31 @@ public class GraphicsPipeline : MonoBehaviour
 
 
         print(Intersect(new Vector2(-1.5f, 0.5f), new Vector2(0.5f, -1.5f), 0));
+
+        Model myModel = new Model();
+        Matrix4x4 M = Matrix4x4.TRS(new Vector3(0, 0, -10), Quaternion.AngleAxis(Vector3.up, 45), Vector3.one);
+        List<Vector4> newVerts = applyTransformation(convertToHomg(myModel.vertices), M);
+        foreach (Vector3Int face in myModel.faces)
+        {
+            process(newVerts[face.x], newVerts[face.y]);
+            process(newVerts[face.y], newVerts[face.z]);
+            process(newVerts[face.z], newVerts[face.x]);
+        }
     }
+
+    private void process(Vector4 start4d, Vector4 end4d)
+    {
+        Vector2 start = project(start4d);
+        Vector2 end = project(start4d);
+
+        if lineClip(ref start, ref end){
+            Vector2Int startPix = pixelise(start);
+            Vector2Int endPix = pixelise(end);
+            List<Vector2Int> points = bresh(startPix, endPix)
+                setPixels(points);
+        }
+    }
+
     /// <summary>
     /// Use Cohen Sutherland Algorithm to clip the Line segment from start to end, NOTE start and end may change
     /// </summary>
@@ -296,13 +333,19 @@ public class GraphicsPipeline : MonoBehaviour
         float xt = end.x;
         float yt = end.y;
         float dx = xt - xo;
+        if (dx < 0) 
+            return bresh(end, start);
         float dy = yt - yo;
+        if (dy < 0)
+            return  NegY(bresh(NegY(start), NegY(end)));
+        if (dy > dx)
+            return SwapXY(bresh(SwapXY(start), SwapXY(end)));
         float neg = 2*(dy - dx);
         float pos = 2 * dy;
         float p = 2 * dy - dx;
-        xo++;
-        while (xo != xt)
+        while (xo < xt)
         {
+            xo++;
             if (p < 0)
             {
                 p += pos;
@@ -316,8 +359,34 @@ public class GraphicsPipeline : MonoBehaviour
             newPoint.x = (int)xo;
             newPoint.y = (int)yo;
             outList.Add(newPoint);
+            
         }
         return outList;
     }
 
+    private List<Vector2Int> SwapXY(List<Vector2Int> vector2Ints)
+    {
+        List<Vector2Int> revs = new List<Vector2Int>();
+        foreach (Vector2Int v in vector2Ints)
+            revs.Add(SwapXY(v));
+        return revs;
+    }
+
+    private Vector2Int SwapXY(Vector2Int point)
+    {
+        return new Vector2Int(point.y, point.x);
+    }
+
+    private List<Vector2Int> NegY(List<Vector2Int> vector2Ints)
+    {
+        List<Vector2Int> outputs = new List<Vector2Int>();
+        foreach (Vector2Int v in vector2Ints)
+            outputs.Add(NegY(v));
+        return outputs;
+    }
+
+    private Vector2Int NegY(Vector2Int point)
+    {
+        return new Vector2Int(point.x, -point.y);
+    }
 }
