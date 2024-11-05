@@ -6,7 +6,7 @@ using UnityEngine;
 public class Model 
 {
   public List<Vector3> vertices;
-   List<Vector3Int> faces;
+  public List<Vector3Int> faces;
     List<Vector2> texturecoordinates;
     List<Vector3Int> texture_index_list;
     List<Vector3> normals;

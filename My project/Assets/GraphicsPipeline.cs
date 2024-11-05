@@ -1,32 +1,39 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class GraphicsPipeline : MonoBehaviour
 {
+    Model myModel = new Model();
     StreamWriter writer;
     Model myLetter;
+    Texture2D screenTexture;
+    private int angle;
+
     // Start is called before the first frame update
     void Start()
     {
-
+        screenTexture = new Texture2D(1024, 1024);
 
         GameObject ScreenGO = GameObject.CreatePrimitive(PrimitiveType.Plane);
         Renderer ScreenRender = ScreenGO.GetComponent<Renderer>();
         ScreenGO.transform.up = Vector3.back;
-        Texture2D screenTexture = new Texture2D(1024, 1024);
+        
         ScreenRender.material.mainTexture = screenTexture;
 
         List<Vector2Int> points = bresh(new Vector2Int(0, 0), new Vector2Int(1024, 1024));
         foreach (Vector2Int point in points)
-            screenTexture.SetPixel(point.x, point.y, Color.red);
+            screenTexture.SetPixel(point.x, point.y, UnityEngine.Color.red);
         screenTexture.Apply();
-        
 
-        
-        writer = new StreamWriter("Verts and Matrices.txt");
+
+
+        /*writer = new StreamWriter("Verts and Matrices.txt");
         myLetter = new Model();
         myLetter.CreateUnityGameObject();
         List<Vector4> verts = convertToHomg(myLetter.vertices);
@@ -194,30 +201,39 @@ public class GraphicsPipeline : MonoBehaviour
 
         print(Intersect(new Vector2(-1.5f, 0.5f), new Vector2(0.5f, -1.5f), 0));
 
-        Model myModel = new Model();
-        Matrix4x4 M = Matrix4x4.TRS(new Vector3(0, 0, -10), Quaternion.AngleAxis(Vector3.up, 45), Vector3.one);
-        List<Vector4> newVerts = applyTransformation(convertToHomg(myModel.vertices), M);
-        foreach (Vector3Int face in myModel.faces)
-        {
-            process(newVerts[face.x], newVerts[face.y]);
-            process(newVerts[face.y], newVerts[face.z]);
-            process(newVerts[face.z], newVerts[face.x]);
-        }
+        
+        */
     }
 
     private void process(Vector4 start4d, Vector4 end4d)
     {
         Vector2 start = project(start4d);
-        Vector2 end = project(start4d);
+        Vector2 end = project(end4d);
 
-        if lineClip(ref start, ref end){
-            Vector2Int startPix = pixelise(start);
-            Vector2Int endPix = pixelise(end);
-            List<Vector2Int> points = bresh(startPix, endPix)
+        if (LineClip(ref start, ref end)){
+            Vector2Int startPix = pixelize(start);
+            Vector2Int endPix = pixelize(end);
+            List<Vector2Int> points = bresh(startPix, endPix);
+            {
                 setPixels(points);
+            }
+                
         }
     }
+    Vector2Int pixelize(Vector2 point) {
+        return new Vector2Int((int)(Mathf.Round((point.x + 1) * 1023 / 2)), (int)(Mathf.Round((point.y + 1) * 1023 / 2)));
+    }
 
+    Vector2 project(Vector4 point)
+    {
+        return new Vector2(point.x/point.z , point.y/point.z);
+    }
+
+    void setPixels(List<Vector2Int> points)
+    {
+        foreach (Vector2Int v in points)
+            screenTexture.SetPixel(v.x, v.y, UnityEngine.Color.red);
+    }
     /// <summary>
     /// Use Cohen Sutherland Algorithm to clip the Line segment from start to end, NOTE start and end may change
     /// </summary>
@@ -288,11 +304,23 @@ public class GraphicsPipeline : MonoBehaviour
         }
         
     }
-        
+
     // Update is called once per frame
     void Update()
     {
-        
+        Destroy(screenTexture);
+        screenTexture = new Texture2D(1024, 1024);
+        angle += 1;
+        Matrix4x4 M = Matrix4x4.TRS(new Vector3(0, 0, -10), Quaternion.AngleAxis(angle, Vector3.up), Vector3.one);
+        List<Vector4> newVerts = applyTransformation(convertToHomg(myModel.vertices), M);
+        foreach (Vector3Int face in myModel.faces)
+        {
+            process(newVerts[face.x], newVerts[face.y]);
+            process(newVerts[face.y], newVerts[face.z]);
+            process(newVerts[face.z], newVerts[face.x]);
+        }
+
+        screenTexture.Apply();
     }
 
     private List<Vector4> applyTransformation
