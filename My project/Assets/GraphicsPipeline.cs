@@ -13,15 +13,16 @@ public class GraphicsPipeline : MonoBehaviour
     StreamWriter writer;
     Model myLetter;
     Texture2D screenTexture;
+    Renderer ScreenRender;
     private int angle;
-
+    
     // Start is called before the first frame update
     void Start()
     {
         screenTexture = new Texture2D(1024, 1024);
 
         GameObject ScreenGO = GameObject.CreatePrimitive(PrimitiveType.Plane);
-        Renderer ScreenRender = ScreenGO.GetComponent<Renderer>();
+        ScreenRender = ScreenGO.GetComponent<Renderer>();
         ScreenGO.transform.up = Vector3.back;
         
         ScreenRender.material.mainTexture = screenTexture;
@@ -211,14 +212,18 @@ public class GraphicsPipeline : MonoBehaviour
         Vector2 end = project(end4d);
 
         if (LineClip(ref start, ref end)){
+           
             Vector2Int startPix = pixelize(start);
             Vector2Int endPix = pixelize(end);
+            if ((startPix.x < 0) || (startPix.y < 0) || (endPix.x < 0) || (endPix.y < 0))
+                print("jlhh");
             List<Vector2Int> points = bresh(startPix, endPix);
             {
                 setPixels(points);
             }
                 
         }
+        
     }
     Vector2Int pixelize(Vector2 point) {
         return new Vector2Int((int)(Mathf.Round((point.x + 1) * 1023 / 2)), (int)(Mathf.Round((point.y + 1) * 1023 / 2)));
@@ -281,17 +286,29 @@ public class GraphicsPipeline : MonoBehaviour
 
     Vector2 Intersect(Vector2 start, Vector2 end, int edge)
     {
-        float m = (end.y - start.y) / (end.x - start.x);
-        float c = start.y - m * (start.x);
+        float m, c;
+
         switch (edge)
         {
             case 0:
+                if (end.x == start.x)
+                    return new Vector2(end.x, 1);
+                m = (end.y - start.y) / (end.x - start.x);
+                c = start.y - m * (start.x);
                 return new Vector2((1 - c) / m, 1);
             case 1:
+                if (end.x == start.x)
+                    return new Vector2(end.x, -1);
+                m = (end.y - start.y) / (end.x - start.x);
+                c = start.y - m * (start.x);
                 return new Vector2((-1 - c) / m, -1);
             case 2:
+                m = (end.y - start.y) / (end.x - start.x);
+                c = start.y - m * (start.x);
                 return new Vector2(-1, m * (-1) + c);
             default:
+                m = (end.y - start.y) / (end.x - start.x);
+                c = start.y - m * (start.x);
                 return new Vector2(1, m * (1) + c);
         }
     }
@@ -310,14 +327,19 @@ public class GraphicsPipeline : MonoBehaviour
     {
         Destroy(screenTexture);
         screenTexture = new Texture2D(1024, 1024);
+        ScreenRender.material.mainTexture = screenTexture;
         angle += 1;
         Matrix4x4 M = Matrix4x4.TRS(new Vector3(0, 0, -10), Quaternion.AngleAxis(angle, Vector3.up), Vector3.one);
         List<Vector4> newVerts = applyTransformation(convertToHomg(myModel.vertices), M);
         foreach (Vector3Int face in myModel.faces)
         {
-            process(newVerts[face.x], newVerts[face.y]);
-            process(newVerts[face.y], newVerts[face.z]);
-            process(newVerts[face.z], newVerts[face.x]);
+            Vector3 a = newVerts[face.y] - newVerts[face.x];
+            Vector3 b = newVerts[face.z] - newVerts[face.y];
+            if (Vector3.Cross(a,b).z < 0) {
+                process(newVerts[face.x], newVerts[face.y]);
+                process(newVerts[face.y], newVerts[face.z]);
+                process(newVerts[face.z], newVerts[face.x]);
+            }
         }
 
         screenTexture.Apply();
