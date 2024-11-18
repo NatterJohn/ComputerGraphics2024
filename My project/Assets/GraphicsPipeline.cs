@@ -205,8 +205,23 @@ public class GraphicsPipeline : MonoBehaviour
         
         */
     }
+    private void DrawScanLines(EdgeTable edgeTable)
+    {
+        foreach(var item in edgeTable.edgeTable)
+        {
+            int y = item.Key;
+            int xMin = item.Value.start;
+            int xMax = item.Value.end;
 
-    private void process(Vector4 start4d, Vector4 end4d)
+            for(int x = xMin; x <= xMax; x++)
+            {
+                screenTexture.SetPixel(x, y, UnityEngine.Color.red);
+            }
+        }
+
+    }
+
+    private void process(Vector4 start4d, Vector4 end4d, EdgeTable edgeTable)
     {
         Vector2 start = project(start4d);
         Vector2 end = project(end4d);
@@ -215,12 +230,12 @@ public class GraphicsPipeline : MonoBehaviour
            
             Vector2Int startPix = pixelize(start);
             Vector2Int endPix = pixelize(end);
-            if ((startPix.x < 0) || (startPix.y < 0) || (endPix.x < 0) || (endPix.y < 0))
-                print("jlhh");
+            /*if ((startPix.x < 0) || (startPix.y < 0) || (endPix.x < 0) || (endPix.y < 0))
+                print("jlhh");*/
             List<Vector2Int> points = bresh(startPix, endPix);
-            {
-                setPixels(points);
-            }
+            //setPixels(points);
+            edgeTable.Add(points);
+            
                 
         }
         
@@ -335,10 +350,14 @@ public class GraphicsPipeline : MonoBehaviour
         {
             Vector3 a = newVerts[face.y] - newVerts[face.x];
             Vector3 b = newVerts[face.z] - newVerts[face.y];
-            if (Vector3.Cross(a,b).z < 0) {
-                process(newVerts[face.x], newVerts[face.y]);
-                process(newVerts[face.y], newVerts[face.z]);
-                process(newVerts[face.z], newVerts[face.x]);
+            if (true) //(Vector3.Cross(a,b).z > 0)
+                      {
+                EdgeTable edgeTable = new EdgeTable();
+                process(newVerts[face.x], newVerts[face.y], edgeTable);
+                process(newVerts[face.y], newVerts[face.z], edgeTable);
+                process(newVerts[face.z], newVerts[face.x], edgeTable);
+
+                DrawScanLines(edgeTable);
             }
         }
 
