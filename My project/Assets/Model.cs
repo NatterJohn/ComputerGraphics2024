@@ -97,7 +97,7 @@ public class Model
     }
 
     private void loadFaces()
-    {
+    { 
         faces.Add(new Vector3Int(0, 1, 3)); texture_index_list.Add(new Vector3Int(0, 3, 2)); normals.Add(new Vector3(0, 0, 1));//Front
         faces.Add(new Vector3Int(0, 3, 2)); texture_index_list.Add(new Vector3Int(0, 2, 1)); normals.Add(new Vector3(0, 0, 1));//Front
         faces.Add(new Vector3Int(4, 6, 7)); texture_index_list.Add(new Vector3Int(4, 7, 6)); normals.Add(new Vector3(0, 0, 1));//Front
@@ -146,6 +146,7 @@ public class Model
         faces.Add(new Vector3Int(1, 18, 4)); texture_index_list.Add(new Vector3Int(17, 15, 16)); normals.Add(new Vector3(0, -1, 0));//Bottom
         faces.Add(new Vector3Int(3, 5, 19)); texture_index_list.Add(new Vector3Int(17, 14, 15)); normals.Add(new Vector3(0, -1, 0));//Bottom
         faces.Add(new Vector3Int(3, 19, 17)); texture_index_list.Add(new Vector3Int(17, 15, 16)); normals.Add(new Vector3(0, -1, 0));//Bottom
+       
     }
 
     public GameObject CreateUnityGameObject()
