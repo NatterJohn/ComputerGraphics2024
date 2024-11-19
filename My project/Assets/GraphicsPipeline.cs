@@ -343,15 +343,15 @@ public class GraphicsPipeline : MonoBehaviour
         Destroy(screenTexture);
         screenTexture = new Texture2D(1024, 1024);
         ScreenRender.material.mainTexture = screenTexture;
-        angle += 1;
+        angle +=1;
         Matrix4x4 M = Matrix4x4.TRS(new Vector3(0, 0, -10), Quaternion.AngleAxis(angle, Vector3.up), Vector3.one);
         List<Vector4> newVerts = applyTransformation(convertToHomg(myModel.vertices), M);
         foreach (Vector3Int face in myModel.faces)
         {
             Vector3 a = newVerts[face.y] - newVerts[face.x];
             Vector3 b = newVerts[face.z] - newVerts[face.y];
-            if (true) //(Vector3.Cross(a,b).z > 0)
-                      {
+            if (Vector3.Cross(a,b).z < 0)
+            {
                 EdgeTable edgeTable = new EdgeTable();
                 process(newVerts[face.x], newVerts[face.y], edgeTable);
                 process(newVerts[face.y], newVerts[face.z], edgeTable);
