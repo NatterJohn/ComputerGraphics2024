@@ -15,6 +15,7 @@ public class GraphicsPipeline : MonoBehaviour
     Texture2D screenTexture;
     Renderer ScreenRender;
     private int angle;
+    Vector2 a2, b2, c2, A, B;
     
     // Start is called before the first frame update
     void Start()
@@ -215,10 +216,18 @@ public class GraphicsPipeline : MonoBehaviour
 
             for(int x = xMin; x <= xMax; x++)
             {
-                screenTexture.SetPixel(x, y, UnityEngine.Color.red);
+                UnityEngine.Color col = GetColorFromTexture(x, y);
+                screenTexture.SetPixel(x, y, col);
             }
         }
 
+    }
+
+    private UnityEngine.Color GetColorFromTexture(int x_p, int y_p)
+    {
+        float x = x_p - a2.x;
+        float y = y_p - a2.y;
+        float r = (((x) * (B.y)) - ((y) * (B.x))) / (((A.x) * (B.y)) - ((A.y) * (B.x)));
     }
 
     private void process(Vector4 start4d, Vector4 end4d, EdgeTable edgeTable)
@@ -348,9 +357,15 @@ public class GraphicsPipeline : MonoBehaviour
         List<Vector4> newVerts = applyTransformation(convertToHomg(myModel.vertices), M);
         foreach (Vector3Int face in myModel.faces)
         {
-            Vector3 a = newVerts[face.y] - newVerts[face.x];
-            Vector3 b = newVerts[face.z] - newVerts[face.y];
-            if (Vector3.Cross(a,b).z < 0)
+            Vector3 a = newVerts[face.x]; //Vector3 a = newVerts[face.y] - newVerts[face.x];
+            Vector3 b = newVerts[face.y]; //Vector3 b = newVerts[face.z] - newVerts[face.y];
+            Vector3 c = newVerts[face.z];
+            a2 = pixelize(project(a));
+            b2 = pixelize(project(b));
+            c2 = pixelize(project(c));
+            A = b2 - a2;
+            B = c2 - a2;
+            if (Vector3.Cross(b2-a2, c2-b2).z < 0)
             {
                 EdgeTable edgeTable = new EdgeTable();
                 process(newVerts[face.x], newVerts[face.y], edgeTable);
