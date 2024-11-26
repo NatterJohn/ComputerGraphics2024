@@ -16,7 +16,13 @@ public class GraphicsPipeline : MonoBehaviour
     Renderer ScreenRender;
     private int angle;
     Vector2 a2, b2, c2, A, B;
-    
+    private Vector2 a_t;
+    private Vector2 b_t;
+    private Vector2 c_t;
+    public Texture2D texturefile;
+     Vector2 A_t;
+     Vector2 B_t;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -228,6 +234,10 @@ public class GraphicsPipeline : MonoBehaviour
         float x = x_p - a2.x;
         float y = y_p - a2.y;
         float r = (((x) * (B.y)) - ((y) * (B.x))) / (((A.x) * (B.y)) - ((A.y) * (B.x)));
+        float s = (((y) * (A.x)) - ((x) * (A.y))) / (((A.x) * (B.y)) - ((A.y) * (B.x)));
+        Vector2 texturepoint = a_t + r*A_t + s*B_t;
+        texturepoint *= 1024;
+        return texturefile.GetPixel((int)texturepoint.x, (int)texturepoint.y);
     }
 
     private void process(Vector4 start4d, Vector4 end4d, EdgeTable edgeTable)
@@ -355,8 +365,9 @@ public class GraphicsPipeline : MonoBehaviour
         angle +=1;
         Matrix4x4 M = Matrix4x4.TRS(new Vector3(0, 0, -10), Quaternion.AngleAxis(angle, Vector3.up), Vector3.one);
         List<Vector4> newVerts = applyTransformation(convertToHomg(myModel.vertices), M);
-        foreach (Vector3Int face in myModel.faces)
+        for ( int i =0;i< myModel.faces.Count;i++)
         {
+            Vector3Int face =myModel.faces[i];
             Vector3 a = newVerts[face.x]; //Vector3 a = newVerts[face.y] - newVerts[face.x];
             Vector3 b = newVerts[face.y]; //Vector3 b = newVerts[face.z] - newVerts[face.y];
             Vector3 c = newVerts[face.z];
@@ -365,6 +376,14 @@ public class GraphicsPipeline : MonoBehaviour
             c2 = pixelize(project(c));
             A = b2 - a2;
             B = c2 - a2;
+
+            a_t = myModel.texturecoordinates[myModel.texture_index_list[i].x];
+            b_t = myModel.texturecoordinates[myModel.texture_index_list[i].y];
+            c_t = myModel.texturecoordinates[myModel.texture_index_list[i].z];
+
+            A_t = b_t - a_t;
+            B_t = c_t - a_t;
+
             if (Vector3.Cross(b2-a2, c2-b2).z < 0)
             {
                 EdgeTable edgeTable = new EdgeTable();
